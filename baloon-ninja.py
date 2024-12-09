@@ -1,15 +1,18 @@
 import pygame
 import random
+import time
 
-# intiating pygame
+# initiating pygame
 pygame.init()
 
 width, height = 720, 500
 fruit_radius = 30
 score = 0
+game_duration = 120  # 2 minutes
+start_time = time.time()
 
 window = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Fruit Ninja By HYVE")
+pygame.display.set_caption("Baloon Ninja By HYVE")
 
 background = pygame.image.load("background.jpg")
 background = pygame.transform.scale(background, (width, height))
@@ -57,14 +60,26 @@ def draw_fruit_with_effect(surface, x, y, color, radius, sliced, is_bomb):
 def draw_slice_line(surface, start, end):
     pygame.draw.line(surface, (255, 255, 255), start, end, 5)
 
-# Movement Control
 running = True
-slicing = False
-sliced_path = []
 while running:
+    elapsed_time = time.time() - start_time
+    remaining_time = max(0, game_duration - int(elapsed_time))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    if remaining_time == 0:
+        # Stop the game and display the end message
+        window.fill((0, 0, 0))
+        game_over_text = font.render("Game End", True, (255, 0, 0))
+        score_text = font.render(f"Total Score: {score}", True, (255, 255, 255))
+        window.blit(game_over_text, (width // 2 - game_over_text.get_width() // 2, height // 2 - 50))
+        window.blit(score_text, (width // 2 - score_text.get_width() // 2, height // 2))
+        pygame.display.flip()
+        pygame.time.wait(3000)  # Wait for 3 seconds before exiting
+        running = False
+        continue
 
     mx, my = pygame.mouse.get_pos()
 
@@ -103,17 +118,17 @@ while running:
 
     sliced_fruits = [sliced_fruit for sliced_fruit in sliced_fruits if sliced_fruit['timer'] > 0]
 
-    if slicing and len(sliced_path) > 1:
-        draw_slice_line(window, sliced_path[0], sliced_path[-1])
+    countdown_text = font.render(f'Time Left: {remaining_time}s', True, (255, 255, 255))
+    window.blit(countdown_text, (width - 200, 10))
 
     score_text = font.render(f'Score: {score}', True, (255, 255, 255))
     window.blit(score_text, (10, 10))
 
     pygame.display.flip()
-
     clock.tick(30)
 
 pygame.quit()
+
 
 
 
